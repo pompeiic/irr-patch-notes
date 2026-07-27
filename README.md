@@ -13,6 +13,31 @@ the editor needs a fine-grained GitHub token (read/write **Contents** on this re
 Alternatively edit `patches.json` on github.com (pencil icon) directly. Either way changes are live
 within ~1 minute of the Pages deploy. A push with malformed JSON is rejected by the validation workflow.
 
+## One-time setup: your editor token
+
+The editor's **Commit to GitHub** button needs a personal access token — a per-person key that lets the
+page commit as you. It is stored **only in your browser** (never in the repo) and can touch **only this
+repo's files**, nothing else you have access to.
+
+1. Make sure you're a **collaborator** on this repo (ask the repo owner to invite you:
+   repo → Settings → Collaborators).
+2. On github.com: click your avatar (top right) → **Settings** → **Developer settings** (bottom of the
+   left sidebar) → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
+3. Fill in:
+   - **Token name:** `patch-notes-editor`
+   - **Expiration:** 1 year (you'll regenerate it after that)
+   - **Repository access:** *Only select repositories* → `irr-patch-notes`
+   - **Permissions → Repository permissions → Contents:** *Read and write* — leave everything else alone
+4. Click **Generate token** and copy the `github_pat_…` string (it's shown only once).
+5. Open the [editor](https://pompeiic.github.io/irr-patch-notes/editor.html), paste the token into the
+   field at the top right, click **Remember**.
+
+Done — Commit to GitHub now works, and your commits show up under your own name. If you switch
+browser/PC or the token expires, repeat steps 2–5.
+
+**No token, no problem:** write the patch in the editor, hit **Copy JSON**, then paste the result over
+`patches.json` on github.com (pencil icon) and commit there with your normal login.
+
 ## Notes formatting
 
 `PatchNotes` supports a markdown subset, rendered identically in the editor preview and in-game
