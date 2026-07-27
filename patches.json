@@ -1,0 +1,19 @@
+{
+  "Patches": [
+    {
+      "Build": "#1.0.0.0",
+      "Date": "2026-07-27T12:00:00",
+      "Title": "Initial Release",
+      "PatchNotes": "- First tracked build.",
+      "bMajorUpdate": true,
+      "bDeleteAllSaveGames": false,
+      "bDeleteGameSettingsSaveGame": false,
+      "bDeleteMissionSaveGame": false,
+      "bDeleteWorldSaveGame": false,
+      "bDeleteVendorSaveGame": false,
+      "bDeleteStashSaveGame": false,
+      "bDeleteInventorySaveGame": false,
+      "bDeleteSafehouseSaveGame": false
+    }
+  ]
+}
