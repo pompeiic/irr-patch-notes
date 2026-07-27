@@ -1,0 +1,9 @@
+name: Validate manifest
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Malformed JSON fails the push check before it can reach players.
+      - run: python -m json.tool patches.json > /dev/null
