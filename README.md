@@ -20,20 +20,29 @@ page commit as you. It is stored **only in your browser** (never in the repo) an
 repo's files**, nothing else you have access to.
 
 1. Make sure you're a **collaborator** on this repo (ask the repo owner to invite you:
-   repo → Settings → Collaborators).
+   repo → Settings → Collaborators) and have accepted the invite.
 2. On github.com: click your avatar (top right) → **Settings** → **Developer settings** (bottom of the
-   left sidebar) → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
+   left sidebar) → **Personal access tokens** → **Tokens (classic)** → **Generate new token (classic)**.
 3. Fill in:
-   - **Token name:** `patch-notes-editor`
+   - **Note:** `patch-notes-editor`
    - **Expiration:** 1 year (you'll regenerate it after that)
-   - **Repository access:** *Only select repositories* → `irr-patch-notes`
-   - **Permissions → Repository permissions → Contents:** *Read and write* — leave everything else alone
-4. Click **Generate token** and copy the `github_pat_…` string (it's shown only once).
+   - **Scopes:** tick **`public_repo`** only — leave everything else unticked
+4. Click **Generate token** and copy the `ghp_…` string (it's shown only once).
 5. Open the [editor](https://pompeiic.github.io/irr-patch-notes/editor.html), paste the token into the
    field at the top right, click **Remember**.
 
 Done — Commit to GitHub now works, and your commits show up under your own name. If you switch
 browser/PC or the token expires, repeat steps 2–5.
+
+> **Why a classic token?** Fine-grained tokens can only target repos *you own*, so they don't work for
+> collaborators on this personal repo. The repo **owner** can use a fine-grained token instead
+> (Repository access: *Only select repositories* → this repo; Permissions → Contents: *Read and write*)
+> for tighter scoping.
+
+**Troubleshooting — `403 Resource not accessible by personal access token`:** the token can't write
+here. Classic: the `public_repo` scope is missing. Fine-grained: Repository access was left on the
+read-only "Public repositories" default, the repo wasn't selected, or Contents isn't *Read and write*.
+Also check you accepted the collaborator invite.
 
 **No token, no problem:** write the patch in the editor, hit **Copy JSON**, then paste the result over
 `patches.json` on github.com (pencil icon) and commit there with your normal login.
