@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IRR Patch Notes Editor</title>
+<style>
+  :root {
+    --bg: #14161a; --panel: #1d2026; --panel2: #23262d; --border: #33373f;
+    --text: #d8dade; --dim: #8a8f98; --accent: #6fdc8c; --danger: #e06c5c; --danger-bg: #3a2320;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  header { display: flex; align-items: center; gap: 16px; padding: 10px 18px; background: var(--panel); border-bottom: 1px solid var(--border); }
+  header h1 { font-size: 16px; margin: 0; letter-spacing: 1px; }
+  header .spacer { flex: 1; }
+  header input { width: 300px; }
+  main { display: grid; grid-template-columns: 260px 1fr 1fr; gap: 0; height: calc(100vh - 53px); }
+  .col { overflow-y: auto; padding: 14px; }
+  #list { background: var(--panel); border-right: 1px solid var(--border); }
+  #form { border-right: 1px solid var(--border); }
+  .patch-item { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; cursor: pointer; background: var(--panel2); }
+  .patch-item:hover { border-color: var(--accent); }
+  .patch-item.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .patch-item .build { font-weight: 600; }
+  .patch-item .title { color: var(--dim); font-size: 13px; }
+  .patch-item .wipes { color: var(--danger); font-size: 12px; margin-top: 2px; }
+  .patch-item .major { color: var(--accent); font-size: 11px; letter-spacing: 1px; }
+  label { display: block; font-size: 12px; color: var(--dim); margin: 12px 0 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  input[type=text], input[type=date], textarea {
+    width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 5px; padding: 8px 10px; font-size: 14px; font-family: inherit;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea#notes { min-height: 260px; font-family: Consolas, monospace; font-size: 13px; resize: vertical; }
+  .row { display: flex; gap: 10px; }
+  .row > div { flex: 1; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 6px; padding: 10px; }
+  .checks label, .inline-check { display: flex; align-items: center; gap: 8px; margin: 0; text-transform: none; font-size: 13px; color: var(--text); cursor: pointer; }
+  .checks .all { grid-column: 1 / -1; font-weight: 600; }
+  button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 5px;
+    padding: 7px 14px; font-size: 13px; cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); color: #10241a; font-weight: 600; border-color: var(--accent); }
+  button.danger { color: var(--danger); border-color: var(--danger); }
+  .toolbar { display: flex; gap: 6px; margin: 6px 0; }
+  .toolbar button { padding: 4px 10px; font-size: 12px; }
+  .actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  #preview { background: var(--panel); }
+  #preview .paper { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
+  #preview h2.patch-title { margin: 0 0 2px; color: var(--accent); }
+  #preview .patch-meta { color: var(--dim); font-size: 13px; margin-bottom: 14px; }
+  #preview .notes h3 { border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 18px 0 8px; }
+  #preview .notes ul { margin: 4px 0; padding-left: 22px; }
+  #preview .wipe-banner { background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; font-size: 14px; }
+  #preview a.steam { color: #66c0f4; }
+  #status { position: fixed; bottom: 16px; right: 16px; padding: 10px 16px; border-radius: 6px; background: var(--panel2); border: 1px solid var(--border); display: none; max-width: 420px; font-size: 13px; }
+  #status.ok { border-color: var(--accent); }
+  #status.err { border-color: var(--danger); }
+  small.hint { color: var(--dim); }
+</style>
+</head>
+<body>
+<header>
+  <h1>IRR PATCH NOTES</h1>
+  <button id="newBtn" class="primary">+ New patch</button>
+  <div class="spacer"></div>
+  <input type="text" id="token" placeholder="GitHub token (repo contents write)" title="Fine-grained PAT with read/write Contents on this repo. Stored only in this browser.">
+  <button id="saveToken">Remember</button>
+</header>
+<main>
+  <div class="col" id="list"></div>
+  <div class="col" id="form">
+    <div class="row">
+      <div><label>Build *</label><input type="text" id="build" placeholder="#1.3.1.0"></div>
+      <div><label>Date *</label><input type="date" id="date"></div>
+    </div>
+    <label>Title *</label><input type="text" id="title" placeholder="The Safehouse Update">
+    <label>Steam announcement URL</label><input type="text" id="steam" placeholder="https://store.steampowered.com/news/app/…/view/…">
+    <label style="margin-top:14px"><span class="inline-check"><input type="checkbox" id="major"> Major update (highlighted in-game)</span></label>
+    <label>Save wipes — union across missed patches applies to late updaters</label>
+    <div class="checks">
+      <label class="all"><input type="checkbox" data-flag="bDeleteAllSaveGames"> Wipe EVERYTHING</label>
+      <label><input type="checkbox" data-flag="bDeleteMissionSaveGame"> Mission progress</label>
+      <label><input type="checkbox" data-flag="bDeleteWorldSaveGame"> World state</label>
+      <label><input type="checkbox" data-flag="bDeleteSafehouseSaveGame"> Safehouse</label>
+      <label><input type="checkbox" data-flag="bDeleteVendorSaveGame"> Vendor</label>
+      <label><input type="checkbox" data-flag="bDeleteStashSaveGame"> Stash</label>
+      <label><input type="checkbox" data-flag="bDeleteInventorySaveGame"> Inventory</label>
+      <label><input type="checkbox" data-flag="bDeleteGameSettingsSaveGame"> Game settings</label>
+    </div>
+    <label>Patch notes — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **bold** (matches in-game rendering)</small></label>
+    <div class="toolbar">
+      <button data-md="## ">Section</button>
+      <button data-md="- ">Bullet</button>
+      <button data-md="**">Bold</button>
+    </div>
+    <textarea id="notes" placeholder="## Gameplay&#10;- Added the safehouse generator&#10;- **Reworked** vendor stock rotation"></textarea>
+    <div class="actions">
+      <button id="applyBtn" class="primary">Apply to list</button>
+      <button id="deleteBtn" class="danger">Delete patch</button>
+      <span style="flex:1"></span>
+      <button id="commitBtn" class="primary">Commit to GitHub</button>
+      <button id="copyBtn">Copy JSON</button>
+    </div>
+  </div>
+  <div class="col" id="preview"><div class="paper" id="paper"></div></div>
+</main>
+<div id="status"></div>
+
+<script>
+const OWNER = "pompeiic", REPO = "irr-patch-notes", FILE = "patches.json", BRANCH = "main";
+const FLAGS = ["bDeleteAllSaveGames","bDeleteGameSettingsSaveGame","bDeleteMissionSaveGame","bDeleteWorldSaveGame",
+               "bDeleteVendorSaveGame","bDeleteStashSaveGame","bDeleteInventorySaveGame","bDeleteSafehouseSaveGame"];
+const FLAG_LABELS = { bDeleteAllSaveGames:"EVERYTHING", bDeleteGameSettingsSaveGame:"Settings", bDeleteMissionSaveGame:"Missions",
+  bDeleteWorldSaveGame:"World", bDeleteVendorSaveGame:"Vendor", bDeleteStashSaveGame:"Stash",
+  bDeleteInventorySaveGame:"Inventory", bDeleteSafehouseSaveGame:"Safehouse" };
+
+let patches = [];
+let selected = -1;
+
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function parseVersion(b) {
+  const nums = (b.match(/\d+/g) || []).map(Number);
+  while (nums.length < 4) nums.push(0);
+  return nums.slice(0, 4);
+}
+function cmpVersion(a, b) {
+  const va = parseVersion(a), vb = parseVersion(b);
+  for (let i = 0; i < 4; i++) if (va[i] !== vb[i]) return va[i] - vb[i];
+  return 0;
+}
+function wipeSummary(p) {
+  if (p.bDeleteAllSaveGames) return "Wipes EVERYTHING";
+  const parts = FLAGS.filter(f => f !== "bDeleteAllSaveGames" && p[f]).map(f => FLAG_LABELS[f]);
+  return parts.length ? "Wipes " + parts.join(", ") : "";
+}
+
+function notesToHtml(md) {
+  const lines = md.replace(/\r\n/g, "\n").split("\n");
+  let html = "", inList = false;
+  const inline = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  for (const line of lines) {
+    if (line.startsWith("- ")) { if (!inList) { html += "<ul>"; inList = true; } html += "<li>" + inline(line.slice(2)) + "</li>"; continue; }
+    if (inList) { html += "</ul>"; inList = false; }
+    if (line.startsWith("## ")) html += "<h3>" + esc(line.slice(3).trim()) + "</h3>";
+    else if (line.trim()) html += "<p>" + inline(line) + "</p>";
+  }
+  if (inList) html += "</ul>";
+  return html;
+}
+
+function renderList() {
+  const el = $("list");
+  el.innerHTML = "";
+  patches.forEach((p, i) => {
+    const div = document.createElement("div");
+    div.className = "patch-item" + (i === selected ? " active" : "");
+    const wipes = wipeSummary(p);
+    div.innerHTML = `<div class="build">${esc(p.Build || "?")}</div><div class="title">${esc(p.Title || "")}</div>`
+      + (p.bMajorUpdate ? `<div class="major">MAJOR UPDATE</div>` : "")
+      + (wipes ? `<div class="wipes">${esc(wipes)}</div>` : "");
+    div.onclick = () => { select(i); };
+    el.appendChild(div);
+  });
+}
+
+function renderPreview() {
+  const p = formToPatch();
+  const wipes = wipeSummary(p);
+  $("paper").innerHTML =
+    `<h2 class="patch-title">${esc(p.Title || "Untitled")}</h2>` +
+    `<div class="patch-meta">${esc(p.Build || "")} — ${esc((p.Date || "").slice(0, 10))}${p.bMajorUpdate ? " — MAJOR UPDATE" : ""}</div>` +
+    (wipes ? `<div class="wipe-banner">&#9888; This update resets: <b>${esc(wipes.replace("Wipes ", ""))}</b></div>` : "") +
+    `<div class="notes">${notesToHtml(p.PatchNotes || "")}</div>` +
+    (p.SteamAnnouncementURL ? `<p><a class="steam" href="${esc(p.SteamAnnouncementURL)}" target="_blank">&#128279; Steam announcement</a></p>` : "");
+}
+
+function select(i) {
+  selected = i;
+  const p = patches[i];
+  $("build").value = p.Build || "";
+  $("date").value = (p.Date || "").slice(0, 10);
+  $("title").value = p.Title || "";
+  $("steam").value = p.SteamAnnouncementURL || "";
+  $("major").checked = !!p.bMajorUpdate;
+  document.querySelectorAll("[data-flag]").forEach(cb => cb.checked = !!p[cb.dataset.flag]);
+  $("notes").value = p.PatchNotes || "";
+  renderList(); renderPreview();
+}
+
+function formToPatch() {
+  const p = {
+    Build: $("build").value.trim(),
+    Date: ($("date").value || new Date().toISOString().slice(0, 10)) + "T12:00:00",
+    Title: $("title").value.trim(),
+    PatchNotes: $("notes").value,
+    SteamAnnouncementURL: $("steam").value.trim(),
+    bMajorUpdate: $("major").checked
+  };
+  document.querySelectorAll("[data-flag]").forEach(cb => p[cb.dataset.flag] = cb.checked);
+  return p;
+}
+
+function applyForm() {
+  const p = formToPatch();
+  if (!p.Build || !/\d/.test(p.Build)) return status("Build is required, e.g. #1.3.1.0", true);
+  if (!p.Title) return status("Title is required", true);
+  const dupe = patches.findIndex((x, i) => i !== selected && cmpVersion(x.Build, p.Build) === 0);
+  if (dupe >= 0) return status("A patch with build " + p.Build + " already exists", true);
+  if (selected >= 0) patches[selected] = p; else { patches.push(p); selected = patches.length - 1; }
+  patches.sort((a, b) => cmpVersion(b.Build, a.Build));
+  selected = patches.findIndex(x => cmpVersion(x.Build, p.Build) === 0);
+  renderList(); renderPreview();
+  status("Applied. Remember to commit.");
+  return true;
+}
+
+function status(msg, isErr) {
+  const el = $("status");
+  el.textContent = msg;
+  el.className = isErr ? "err" : "ok";
+  el.style.display = "block";
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.style.display = "none", 5000);
+  return !isErr;
+}
+
+function manifestJson() {
+  return JSON.stringify({ Patches: patches }, null, 2) + "\n";
+}
+
+async function commit() {
+  if (selected >= 0 && !applyForm()) return;
+  const token = $("token").value.trim();
+  if (!token) return status("Paste a GitHub token first (top right)", true);
+  const api = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+  const headers = { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" };
+  try {
+    const cur = await fetch(api + "?ref=" + BRANCH, { headers });
+    if (!cur.ok) throw new Error("Fetching current file failed: " + cur.status);
+    const sha = (await cur.json()).sha;
+    const body = {
+      message: "Update patch notes (editor)",
+      content: btoa(unescape(encodeURIComponent(manifestJson()))),
+      sha, branch: BRANCH
+    };
+    const put = await fetch(api, { method: "PUT", headers, body: JSON.stringify(body) });
+    if (!put.ok) throw new Error("Commit failed: " + put.status + " " + (await put.text()).slice(0, 200));
+    status("Committed. Live on the site in ~1 minute.");
+  } catch (e) { status(e.message, true); }
+}
+
+async function load() {
+  try {
+    const res = await fetch(FILE + "?t=" + Date.now());
+    const data = await res.json();
+    patches = data.Patches || data || [];
+    patches.sort((a, b) => cmpVersion(b.Build, a.Build));
+    if (patches.length) select(0); else renderList();
+  } catch (e) { status("Could not load " + FILE + ": " + e.message, true); }
+}
+
+$("newBtn").onclick = () => {
+  selected = -1;
+  $("build").value = ""; $("title").value = ""; $("steam").value = ""; $("notes").value = "";
+  $("date").value = new Date().toISOString().slice(0, 10);
+  $("major").checked = false;
+  document.querySelectorAll("[data-flag]").forEach(cb => cb.checked = false);
+  renderList(); renderPreview();
+};
+$("applyBtn").onclick = applyForm;
+$("deleteBtn").onclick = () => {
+  if (selected < 0) return;
+  if (!confirm("Delete patch " + (patches[selected].Build || "") + " from the manifest?")) return;
+  patches.splice(selected, 1); selected = -1;
+  renderList(); renderPreview();
+  status("Deleted locally. Remember to commit.");
+};
+$("commitBtn").onclick = commit;
+$("copyBtn").onclick = () => { if (selected < 0 || applyForm()) { navigator.clipboard.writeText(manifestJson()); status("Manifest JSON copied."); } };
+$("saveToken").onclick = () => { localStorage.setItem("irr_pat", $("token").value.trim()); status("Token stored in this browser."); };
+document.querySelectorAll(".toolbar [data-md]").forEach(btn => btn.onclick = () => {
+  const ta = $("notes"), md = btn.dataset.md, s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
+  if (md === "**") ta.value = v.slice(0, s) + "**" + v.slice(s, e) + "**" + v.slice(e);
+  else ta.value = v.slice(0, s) + (s === 0 || v[s - 1] === "\n" ? "" : "\n") + md + v.slice(s);
+  ta.focus(); renderPreview();
+});
+["build","date","title","steam","notes"].forEach(id => $(id).addEventListener("input", renderPreview));
+$("major").addEventListener("change", renderPreview);
+document.querySelectorAll("[data-flag]").forEach(cb => cb.addEventListener("change", renderPreview));
+$("token").value = localStorage.getItem("irr_pat") || "";
+load();
+</script>
+</body>
+</html>

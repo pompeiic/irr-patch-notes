@@ -5,6 +5,7 @@
       "Date": "2026-07-27T12:00:00",
       "Title": "Initial Tracked Build",
       "PatchNotes": "- Patch note system goes live. Future updates will list their changes here.",
+      "SteamAnnouncementURL": "",
       "bMajorUpdate": true,
       "bDeleteAllSaveGames": false,
       "bDeleteGameSettingsSaveGame": false,
