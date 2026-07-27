@@ -8,13 +8,13 @@
       "SteamAnnouncementURL": "",
       "bMajorUpdate": true,
       "bDeleteAllSaveGames": false,
-      "bDeleteGameSettingsSaveGame": false,
       "bDeleteMissionSaveGame": false,
       "bDeleteWorldSaveGame": false,
+      "bDeleteSafehouseSaveGame": false,
       "bDeleteVendorSaveGame": false,
       "bDeleteStashSaveGame": false,
       "bDeleteInventorySaveGame": false,
-      "bDeleteSafehouseSaveGame": false
+      "bDeleteGameSettingsSaveGame": false
     }
   ]
 }
