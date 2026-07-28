@@ -352,6 +352,7 @@ async function commit() {
     const cur = await fetch(api + "?ref=" + BRANCH, { headers });
     let sha = undefined;
     if (cur.ok) sha = (await cur.json()).sha;
+    else if (cur.status === 401) throw new Error("GitHub rejected the token (401) — it expired, was regenerated, or was pasted incompletely. Create/copy a fresh token, paste it top-right and click Remember.");
     else if (cur.status !== 404) throw new Error("Fetching current file failed: " + cur.status);
     const body = {
       message: "Update " + file + " (editor)",
