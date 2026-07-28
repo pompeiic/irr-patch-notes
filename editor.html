@@ -8,6 +8,7 @@
   :root {
     --bg: #14161a; --panel: #1d2026; --panel2: #23262d; --border: #33373f;
     --text: #d8dade; --dim: #8a8f98; --accent: #6fdc8c; --danger: #e06c5c; --danger-bg: #3a2320;
+    --news: #6fb4dc;
   }
   * { box-sizing: border-box; }
   body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); }
@@ -15,10 +16,14 @@
   header h1 { font-size: 16px; margin: 0; letter-spacing: 1px; }
   header .spacer { flex: 1; }
   header input { width: 300px; }
+  .tabs { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .tabs button { border: none; border-radius: 0; padding: 7px 18px; background: var(--panel2); }
+  .tabs button.active { background: var(--accent); color: #10241a; font-weight: 600; }
+  .tabs button.active.news-tab { background: var(--news); color: #0e2230; }
   main { display: grid; grid-template-columns: 260px 1fr 1fr; gap: 0; height: calc(100vh - 53px); }
   .col { overflow-y: auto; padding: 14px; }
   #list { background: var(--panel); border-right: 1px solid var(--border); }
-  #form { border-right: 1px solid var(--border); }
+  .form-col { border-right: 1px solid var(--border); }
   .patch-item { padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; cursor: pointer; background: var(--panel2); }
   .patch-item:hover { border-color: var(--accent); }
   .patch-item.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
@@ -26,13 +31,14 @@
   .patch-item .title { color: var(--dim); font-size: 13px; }
   .patch-item .wipes { color: var(--danger); font-size: 12px; margin-top: 2px; }
   .patch-item .major { color: var(--accent); font-size: 11px; letter-spacing: 1px; }
+  .patch-item .newsdate { color: var(--news); font-size: 12px; }
   label { display: block; font-size: 12px; color: var(--dim); margin: 12px 0 4px; text-transform: uppercase; letter-spacing: 0.5px; }
   input[type=text], input[type=date], textarea {
     width: 100%; background: var(--panel2); color: var(--text); border: 1px solid var(--border);
     border-radius: 5px; padding: 8px 10px; font-size: 14px; font-family: inherit;
   }
   input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-  textarea#notes { min-height: 260px; font-family: Consolas, monospace; font-size: 13px; resize: vertical; }
+  textarea.body-md { min-height: 260px; font-family: Consolas, monospace; font-size: 13px; resize: vertical; }
   .row { display: flex; gap: 10px; }
   .row > div { flex: 1; }
   .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--danger-bg); border: 1px solid var(--danger); border-radius: 6px; padding: 10px; }
@@ -51,6 +57,7 @@
   #preview { background: var(--panel); }
   #preview .paper { background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; }
   #preview h2.patch-title { margin: 0 0 2px; color: var(--accent); }
+  #preview h2.news-title { margin: 0 0 2px; color: var(--news); }
   #preview .patch-meta { color: var(--dim); font-size: 13px; margin-bottom: 14px; }
   #preview .notes h3 { border-bottom: 1px solid var(--border); padding-bottom: 4px; margin: 18px 0 8px; }
   #preview .notes ul { margin: 4px 0; padding-left: 22px; }
@@ -64,15 +71,21 @@
 </head>
 <body>
 <header>
-  <h1>IRR PATCH NOTES</h1>
-  <button id="newBtn" class="primary">+ New patch</button>
+  <h1>IRR LIVE DATA</h1>
+  <div class="tabs">
+    <button id="tabPatches" class="active">Patch notes</button>
+    <button id="tabNews" class="news-tab">News</button>
+  </div>
+  <button id="newBtn" class="primary">+ New entry</button>
   <div class="spacer"></div>
   <input type="text" id="token" placeholder="GitHub token (repo contents write)" title="Fine-grained PAT with read/write Contents on this repo. Stored only in this browser.">
   <button id="saveToken">Remember</button>
 </header>
 <main>
   <div class="col" id="list"></div>
-  <div class="col" id="form">
+
+  <!-- Patch form -->
+  <div class="col form-col" id="form">
     <div class="row">
       <div><label>Build *</label><input type="text" id="build" placeholder="#1.3.1.0"></div>
       <div><label>Date *</label><input type="date" id="date"></div>
@@ -92,37 +105,64 @@
       <label><input type="checkbox" data-flag="bDeleteGameSettingsSaveGame"> Game settings</label>
     </div>
     <label>Patch notes — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **bold** (matches in-game rendering)</small></label>
-    <div class="toolbar">
+    <div class="toolbar" data-target="notes">
       <button data-md="## ">Section</button>
       <button data-md="- ">Bullet</button>
       <button data-md="**">Bold</button>
     </div>
-    <textarea id="notes" placeholder="## Gameplay&#10;- Added the safehouse generator&#10;- **Reworked** vendor stock rotation"></textarea>
+    <textarea id="notes" class="body-md" placeholder="## Gameplay&#10;- Added the safehouse generator&#10;- **Reworked** vendor stock rotation"></textarea>
     <div class="actions">
       <button id="applyBtn" class="primary">Apply to list</button>
-      <button id="deleteBtn" class="danger">Delete patch</button>
+      <button id="deleteBtn" class="danger">Delete entry</button>
       <span style="flex:1"></span>
       <button id="commitBtn" class="primary">Commit to GitHub</button>
       <button id="copyBtn">Copy JSON</button>
     </div>
   </div>
+
+  <!-- News form -->
+  <div class="col form-col" id="newsForm" style="display:none">
+    <div class="row">
+      <div><label>Date *</label><input type="date" id="newsDate"></div>
+      <div><label>Id — <small class="hint">auto from title; NEVER change after publishing</small></label><input type="text" id="newsId" placeholder="2026-07-summer-event"></div>
+    </div>
+    <label>Title *</label><input type="text" id="newsTitle" placeholder="Community Event: Long Night">
+    <label>Link URL (Steam, Discord, …)</label><input type="text" id="newsLink" placeholder="https://…">
+    <label>Body * — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **bold** — lands in the player inbox</small></label>
+    <div class="toolbar" data-target="newsBody">
+      <button data-md="## ">Section</button>
+      <button data-md="- ">Bullet</button>
+      <button data-md="**">Bold</button>
+    </div>
+    <textarea id="newsBody" class="body-md" placeholder="Operators,&#10;&#10;this weekend the **Long Night** event runs on all maps.&#10;- Night raids only&#10;- Double vendor payouts"></textarea>
+    <div class="actions">
+      <button id="newsApplyBtn" class="primary">Apply to list</button>
+      <button id="newsDeleteBtn" class="danger">Delete entry</button>
+      <span style="flex:1"></span>
+      <button id="newsCommitBtn" class="primary">Commit to GitHub</button>
+      <button id="newsCopyBtn">Copy JSON</button>
+    </div>
+  </div>
+
   <div class="col" id="preview"><div class="paper" id="paper"></div></div>
 </main>
 <div id="status"></div>
 
 <script>
-const OWNER = "pompeiic", REPO = "irr-patch-notes", FILE = "patches.json", BRANCH = "main";
+const OWNER = "pompeiic", REPO = "irr-patch-notes", BRANCH = "main";
 const FLAGS = ["bDeleteAllSaveGames","bDeleteGameSettingsSaveGame","bDeleteMissionSaveGame","bDeleteWorldSaveGame",
                "bDeleteVendorSaveGame","bDeleteStashSaveGame","bDeleteInventorySaveGame","bDeleteSafehouseSaveGame"];
 const FLAG_LABELS = { bDeleteAllSaveGames:"EVERYTHING", bDeleteGameSettingsSaveGame:"Settings", bDeleteMissionSaveGame:"Missions",
   bDeleteWorldSaveGame:"World", bDeleteVendorSaveGame:"Vendor", bDeleteStashSaveGame:"Stash",
   bDeleteInventorySaveGame:"Inventory", bDeleteSafehouseSaveGame:"Safehouse" };
 
-let patches = [];
-let selected = -1;
+let mode = "patches";           // "patches" | "news"
+let patches = [], news = [];
+let selected = -1;              // index into the current mode's array
 
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const items = () => mode === "patches" ? patches : news;
 
 function parseVersion(b) {
   const nums = (b.match(/\d+/g) || []).map(Number);
@@ -138,6 +178,9 @@ function wipeSummary(p) {
   if (p.bDeleteAllSaveGames) return "Wipes EVERYTHING";
   const parts = FLAGS.filter(f => f !== "bDeleteAllSaveGames" && p[f]).map(f => FLAG_LABELS[f]);
   return parts.length ? "Wipes " + parts.join(", ") : "";
+}
+function slug(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 48);
 }
 
 function notesToHtml(md) {
@@ -157,43 +200,79 @@ function notesToHtml(md) {
 function renderList() {
   const el = $("list");
   el.innerHTML = "";
-  patches.forEach((p, i) => {
+  items().forEach((p, i) => {
     const div = document.createElement("div");
     div.className = "patch-item" + (i === selected ? " active" : "");
-    const wipes = wipeSummary(p);
-    div.innerHTML = `<div class="build">${esc(p.Build || "?")}</div><div class="title">${esc(p.Title || "")}</div>`
-      + (p.bMajorUpdate ? `<div class="major">MAJOR UPDATE</div>` : "")
-      + (wipes ? `<div class="wipes">${esc(wipes)}</div>` : "");
+    if (mode === "patches") {
+      const wipes = wipeSummary(p);
+      div.innerHTML = `<div class="build">${esc(p.Build || "?")}</div><div class="title">${esc(p.Title || "")}</div>`
+        + (p.bMajorUpdate ? `<div class="major">MAJOR UPDATE</div>` : "")
+        + (wipes ? `<div class="wipes">${esc(wipes)}</div>` : "");
+    } else {
+      div.innerHTML = `<div class="build">${esc(p.Title || "?")}</div><div class="newsdate">${esc((p.Date || "").slice(0, 10))}</div>`
+        + `<div class="title">${esc(p.Id || "")}</div>`;
+    }
     div.onclick = () => { select(i); };
     el.appendChild(div);
   });
 }
 
 function renderPreview() {
-  const p = formToPatch();
-  const wipes = wipeSummary(p);
-  $("paper").innerHTML =
-    `<h2 class="patch-title">${esc(p.Title || "Untitled")}</h2>` +
-    `<div class="patch-meta">${esc(p.Build || "")} — ${esc((p.Date || "").slice(0, 10))}${p.bMajorUpdate ? " — MAJOR UPDATE" : ""}</div>` +
-    (wipes ? `<div class="wipe-banner">&#9888; This update resets: <b>${esc(wipes.replace("Wipes ", ""))}</b></div>` : "") +
-    `<div class="notes">${notesToHtml(p.PatchNotes || "")}</div>` +
-    (p.SteamAnnouncementURL ? `<p><a class="steam" href="${esc(p.SteamAnnouncementURL)}" target="_blank">&#128279; Steam announcement</a></p>` : "");
+  if (mode === "patches") {
+    const p = patchFromForm();
+    const wipes = wipeSummary(p);
+    $("paper").innerHTML =
+      `<h2 class="patch-title">${esc(p.Title || "Untitled")}</h2>` +
+      `<div class="patch-meta">${esc(p.Build || "")} — ${esc((p.Date || "").slice(0, 10))}${p.bMajorUpdate ? " — MAJOR UPDATE" : ""}</div>` +
+      (wipes ? `<div class="wipe-banner">&#9888; This update resets: <b>${esc(wipes.replace("Wipes ", ""))}</b></div>` : "") +
+      `<div class="notes">${notesToHtml(p.PatchNotes || "")}</div>` +
+      (p.SteamAnnouncementURL ? `<p><a class="steam" href="${esc(p.SteamAnnouncementURL)}" target="_blank">&#128279; Steam announcement</a></p>` : "");
+  } else {
+    const n = newsFromForm();
+    $("paper").innerHTML =
+      `<h2 class="news-title">${esc(n.Title || "Untitled")}</h2>` +
+      `<div class="patch-meta">${esc((n.Date || "").slice(0, 10))} — inbox message</div>` +
+      `<div class="notes">${notesToHtml(n.Body || "")}</div>` +
+      (n.LinkURL ? `<p><a class="steam" href="${esc(n.LinkURL)}" target="_blank">&#128279; ${esc(n.LinkURL)}</a></p>` : "");
+  }
 }
 
 function select(i) {
   selected = i;
-  const p = patches[i];
-  $("build").value = p.Build || "";
-  $("date").value = (p.Date || "").slice(0, 10);
-  $("title").value = p.Title || "";
-  $("steam").value = p.SteamAnnouncementURL || "";
-  $("major").checked = !!p.bMajorUpdate;
-  document.querySelectorAll("[data-flag]").forEach(cb => cb.checked = !!p[cb.dataset.flag]);
-  $("notes").value = p.PatchNotes || "";
+  const p = items()[i];
+  if (mode === "patches") {
+    $("build").value = p.Build || "";
+    $("date").value = (p.Date || "").slice(0, 10);
+    $("title").value = p.Title || "";
+    $("steam").value = p.SteamAnnouncementURL || "";
+    $("major").checked = !!p.bMajorUpdate;
+    document.querySelectorAll("[data-flag]").forEach(cb => cb.checked = !!p[cb.dataset.flag]);
+    $("notes").value = p.PatchNotes || "";
+  } else {
+    $("newsId").value = p.Id || "";
+    $("newsDate").value = (p.Date || "").slice(0, 10);
+    $("newsTitle").value = p.Title || "";
+    $("newsLink").value = p.LinkURL || "";
+    $("newsBody").value = p.Body || "";
+  }
   renderList(); renderPreview();
 }
 
-function formToPatch() {
+function clearForm() {
+  selected = -1;
+  if (mode === "patches") {
+    $("build").value = ""; $("title").value = ""; $("steam").value = ""; $("notes").value = "";
+    $("date").value = new Date().toISOString().slice(0, 10);
+    $("major").checked = false;
+    document.querySelectorAll("[data-flag]").forEach(cb => cb.checked = false);
+  } else {
+    $("newsId").value = ""; $("newsTitle").value = ""; $("newsLink").value = ""; $("newsBody").value = "";
+    $("newsDate").value = new Date().toISOString().slice(0, 10);
+  }
+  renderList(); renderPreview();
+}
+
+function patchFromForm() {
   const p = {
     Build: $("build").value.trim(),
     Date: ($("date").value || new Date().toISOString().slice(0, 10)) + "T12:00:00",
@@ -206,15 +285,40 @@ function formToPatch() {
   return p;
 }
 
+function newsFromForm() {
+  return {
+    Id: $("newsId").value.trim(),
+    Date: ($("newsDate").value || new Date().toISOString().slice(0, 10)) + "T12:00:00",
+    Title: $("newsTitle").value.trim(),
+    Body: $("newsBody").value,
+    LinkURL: $("newsLink").value.trim()
+  };
+}
+
 function applyForm() {
-  const p = formToPatch();
-  if (!p.Build || !/\d/.test(p.Build)) return status("Build is required, e.g. #1.3.1.0", true);
-  if (!p.Title) return status("Title is required", true);
-  const dupe = patches.findIndex((x, i) => i !== selected && cmpVersion(x.Build, p.Build) === 0);
-  if (dupe >= 0) return status("A patch with build " + p.Build + " already exists", true);
-  if (selected >= 0) patches[selected] = p; else { patches.push(p); selected = patches.length - 1; }
-  patches.sort((a, b) => cmpVersion(b.Build, a.Build));
-  selected = patches.findIndex(x => cmpVersion(x.Build, p.Build) === 0);
+  if (mode === "patches") {
+    const p = patchFromForm();
+    if (!p.Build || !/\d/.test(p.Build)) return status("Build is required, e.g. #1.3.1.0", true);
+    if (!p.Title) return status("Title is required", true);
+    const dupe = patches.findIndex((x, i) => i !== selected && cmpVersion(x.Build, p.Build) === 0);
+    if (dupe >= 0) return status("A patch with build " + p.Build + " already exists", true);
+    if (selected >= 0) patches[selected] = p; else { patches.push(p); selected = patches.length - 1; }
+    patches.sort((a, b) => cmpVersion(b.Build, a.Build));
+    selected = patches.findIndex(x => cmpVersion(x.Build, p.Build) === 0);
+  } else {
+    const n = newsFromForm();
+    if (!n.Title) return status("Title is required", true);
+    if (!n.Body.trim()) return status("Body is required", true);
+    if (!n.Id) { n.Id = n.Date.slice(0, 10) + "-" + slug(n.Title); $("newsId").value = n.Id; }
+    const dupe = news.findIndex((x, i) => i !== selected && x.Id === n.Id);
+    if (dupe >= 0) return status("A news entry with id " + n.Id + " already exists", true);
+    if (selected >= 0 && news[selected].Id && news[selected].Id !== n.Id
+        && !confirm("Id changed — players who already received \"" + news[selected].Id + "\" will get this entry AGAIN as a new message. Continue?"))
+      return false;
+    if (selected >= 0) news[selected] = n; else { news.push(n); selected = news.length - 1; }
+    news.sort((a, b) => (b.Date || "").localeCompare(a.Date || ""));
+    selected = news.findIndex(x => x.Id === n.Id);
+  }
   renderList(); renderPreview();
   status("Applied. Remember to commit.");
   return true;
@@ -230,67 +334,89 @@ function status(msg, isErr) {
   return !isErr;
 }
 
+const fileFor = m => m === "patches" ? "patches.json" : "news.json";
 function manifestJson() {
-  return JSON.stringify({ Patches: patches }, null, 2) + "\n";
+  return mode === "patches"
+    ? JSON.stringify({ Patches: patches }, null, 2) + "\n"
+    : JSON.stringify({ News: news }, null, 2) + "\n";
 }
 
 async function commit() {
   if (selected >= 0 && !applyForm()) return;
   const token = $("token").value.trim();
   if (!token) return status("Paste a GitHub token first (top right)", true);
-  const api = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`;
+  const file = fileFor(mode);
+  const api = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${file}`;
   const headers = { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json" };
   try {
     const cur = await fetch(api + "?ref=" + BRANCH, { headers });
-    if (!cur.ok) throw new Error("Fetching current file failed: " + cur.status);
-    const sha = (await cur.json()).sha;
+    let sha = undefined;
+    if (cur.ok) sha = (await cur.json()).sha;
+    else if (cur.status !== 404) throw new Error("Fetching current file failed: " + cur.status);
     const body = {
-      message: "Update patch notes (editor)",
+      message: "Update " + file + " (editor)",
       content: btoa(unescape(encodeURIComponent(manifestJson()))),
-      sha, branch: BRANCH
+      branch: BRANCH
     };
+    if (sha) body.sha = sha;
     const put = await fetch(api, { method: "PUT", headers, body: JSON.stringify(body) });
     if (!put.ok) throw new Error("Commit failed: " + put.status + " " + (await put.text()).slice(0, 200));
-    status("Committed. Live on the site in ~1 minute.");
+    status("Committed " + file + ". Live on the site in ~1 minute.");
   } catch (e) { status(e.message, true); }
 }
 
 async function load() {
   try {
-    const res = await fetch(FILE + "?t=" + Date.now());
+    const res = await fetch("patches.json?t=" + Date.now());
     const data = await res.json();
     patches = data.Patches || data || [];
     patches.sort((a, b) => cmpVersion(b.Build, a.Build));
-    if (patches.length) select(0); else renderList();
-  } catch (e) { status("Could not load " + FILE + ": " + e.message, true); }
+  } catch (e) { status("Could not load patches.json: " + e.message, true); }
+  try {
+    const res = await fetch("news.json?t=" + Date.now());
+    const data = await res.json();
+    news = data.News || data || [];
+    news.sort((a, b) => (b.Date || "").localeCompare(a.Date || ""));
+  } catch (e) { /* news.json may not exist yet */ }
+  if (items().length) select(0); else clearForm();
 }
 
-$("newBtn").onclick = () => {
+function setMode(m) {
+  mode = m;
   selected = -1;
-  $("build").value = ""; $("title").value = ""; $("steam").value = ""; $("notes").value = "";
-  $("date").value = new Date().toISOString().slice(0, 10);
-  $("major").checked = false;
-  document.querySelectorAll("[data-flag]").forEach(cb => cb.checked = false);
-  renderList(); renderPreview();
-};
+  $("tabPatches").classList.toggle("active", m === "patches");
+  $("tabNews").classList.toggle("active", m === "news");
+  $("form").style.display = m === "patches" ? "" : "none";
+  $("newsForm").style.display = m === "news" ? "" : "none";
+  if (items().length) select(0); else clearForm();
+}
+
+$("tabPatches").onclick = () => setMode("patches");
+$("tabNews").onclick = () => setMode("news");
+$("newBtn").onclick = clearForm;
 $("applyBtn").onclick = applyForm;
-$("deleteBtn").onclick = () => {
+$("newsApplyBtn").onclick = applyForm;
+$("deleteBtn").onclick = $("newsDeleteBtn").onclick = () => {
   if (selected < 0) return;
-  if (!confirm("Delete patch " + (patches[selected].Build || "") + " from the manifest?")) return;
-  patches.splice(selected, 1); selected = -1;
+  const label = mode === "patches" ? (items()[selected].Build || "") : (items()[selected].Id || "");
+  if (!confirm("Delete " + label + " from the manifest?")) return;
+  items().splice(selected, 1); selected = -1;
   renderList(); renderPreview();
   status("Deleted locally. Remember to commit.");
 };
-$("commitBtn").onclick = commit;
-$("copyBtn").onclick = () => { if (selected < 0 || applyForm()) { navigator.clipboard.writeText(manifestJson()); status("Manifest JSON copied."); } };
+$("commitBtn").onclick = $("newsCommitBtn").onclick = commit;
+$("copyBtn").onclick = $("newsCopyBtn").onclick = () => {
+  if (selected < 0 || applyForm()) { navigator.clipboard.writeText(manifestJson()); status("Manifest JSON copied."); }
+};
 $("saveToken").onclick = () => { localStorage.setItem("irr_pat", $("token").value.trim()); status("Token stored in this browser."); };
 document.querySelectorAll(".toolbar [data-md]").forEach(btn => btn.onclick = () => {
-  const ta = $("notes"), md = btn.dataset.md, s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
+  const ta = $(btn.closest(".toolbar").dataset.target), md = btn.dataset.md, s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
   if (md === "**") ta.value = v.slice(0, s) + "**" + v.slice(s, e) + "**" + v.slice(e);
   else ta.value = v.slice(0, s) + (s === 0 || v[s - 1] === "\n" ? "" : "\n") + md + v.slice(s);
   ta.focus(); renderPreview();
 });
-["build","date","title","steam","notes"].forEach(id => $(id).addEventListener("input", renderPreview));
+["build","date","title","steam","notes","newsId","newsDate","newsTitle","newsLink","newsBody"]
+  .forEach(id => $(id).addEventListener("input", renderPreview));
 $("major").addEventListener("change", renderPreview);
 document.querySelectorAll("[data-flag]").forEach(cb => cb.addEventListener("change", renderPreview));
 $("token").value = localStorage.getItem("irr_pat") || "";

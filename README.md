@@ -1,17 +1,23 @@
-# IRR Patch Notes
+# IRR Patch Notes & News
 
-The game fetches `patches.json` from this repo's GitHub Pages URL on reaching the main menu
-(`UIRRPatchSubsystem`, configured via `PatchManifestURL` in Project Settings → General Settings).
+The game fetches two files from this repo's GitHub Pages URL at startup (`UIRRPatchSubsystem`,
+configured via `PatchManifestURL` / `NewsManifestURL` in Project Settings → General Settings):
+
+- **`patches.json`** — patch notes + save-wipe flags, shown as the post-update popup.
+- **`news.json`** — general news (events, announcements). Each entry is delivered **once** into every
+  player's in-game inbox as a message (`UIRRInboxComponent` news sync).
 
 ## Editing
 
-**Graphical editor (preferred):** https://pompeiic.github.io/irr-patch-notes/editor.html — form UI,
-live preview matching the in-game rendering, wipe-flag checkboxes, Steam link field. Committing from
+**Graphical editor (preferred):** https://pompeiic.github.io/irr-patch-notes/editor.html — switch
+between **Patch notes** and **News** with the tabs top-left; form UI, live preview matching the
+in-game rendering, wipe-flag checkboxes, Steam/link fields. Committing from
 the editor needs a fine-grained GitHub token (read/write **Contents** on this repo), pasted top-right
 ("Remember" stores it in your browser only).
 
-Alternatively edit `patches.json` on github.com (pencil icon) directly. Either way changes are live
-within ~1 minute of the Pages deploy. A push with malformed JSON is rejected by the validation workflow.
+Alternatively edit `patches.json` / `news.json` on github.com (pencil icon) directly. Either way changes
+are live within ~1 minute of the Pages deploy. A push with malformed JSON is rejected by the validation
+workflow.
 
 ## One-time setup: your editor token
 
@@ -52,7 +58,7 @@ Also check you accepted the collaborator invite.
 `PatchNotes` supports a markdown subset, rendered identically in the editor preview and in-game
 (`UIRRPatchSubsystem::PatchNotesToRichText`): `## ` section header, `- ` bullet, `**bold**`.
 
-## Entry format
+## Patch entry format (`patches.json`)
 
 | Key | Meaning |
 |---|---|
@@ -64,9 +70,24 @@ Also check you accepted the collaborator invite.
 | `bMajorUpdate` | Marks a major update (highlighted in the history menu). |
 | `bDelete*SaveGame` | What this patch wipes: All / GameSettings / Mission / World / Vendor / Stash / Inventory / Safehouse. |
 
+## News entry format (`news.json`)
+
+| Key | Meaning |
+|---|---|
+| `Id` | **Stable unique id**, e.g. `"2026-07-summer-event"`. The game delivers each id once per player, ever — **never change an Id after publishing** (players would receive the entry again as a new message). The editor auto-generates one from date + title. |
+| `Date` | ISO 8601. Used as the inbox message timestamp. |
+| `Title` | Message title in the inbox. |
+| `Body` | Message text (same markdown subset as patch notes). |
+| `LinkURL` | Optional external link (Steam page, Discord, …) shown as a button on the message. |
+
+To retire old news, just delete the entry — players who already received it keep their inbox message;
+players who never saw it won't get it anymore.
+
 ## Rules
 
 - **Wipe flags are destructive** — a player updating across several versions gets the **union** of all
   missed patches' flags. Double-check before committing; prefer a PR + review for any wipe.
 - Entries with a `Build` newer than the installed game never wipe — they only flip the
   "update available" state. So it's safe to publish notes slightly before the build goes live.
+- News: keep the list short (newest first); prune outdated events. Editing an entry's text is safe
+  (players who already got it keep the old text; it is not re-delivered) — only the `Id` must stay fixed.

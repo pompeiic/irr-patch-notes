@@ -7,3 +7,4 @@ jobs:
       - uses: actions/checkout@v4
       # Malformed JSON fails the push check before it can reach players.
       - run: python -m json.tool patches.json > /dev/null
+      - run: python -m json.tool news.json > /dev/null
