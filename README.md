@@ -1,7 +1,8 @@
-# IRR Patch Notes & News
+# Incursion Red River — News & Patch Notes
 
 The game fetches two files from this repo's GitHub Pages URL at startup (`UIRRPatchSubsystem`,
-configured via `PatchManifestURL` / `NewsManifestURL` in Project Settings → General Settings):
+configured via `PatchManifestURL` / `NewsManifestURL` in Project Settings → **Patch System**,
+`IRRPatchSystem` module):
 
 - **`patches.json`** — patch notes + save-wipe flags, shown as the post-update popup.
 - **`news.json`** — general news (events, announcements). Each entry is delivered **once** into every
@@ -74,7 +75,7 @@ Also check you accepted the collaborator invite.
 
 | Key | Meaning |
 |---|---|
-| `Id` | **Stable unique id**, e.g. `"2026-07-summer-event"`. The game delivers each id once per player, ever — **never change an Id after publishing** (players would receive the entry again as a new message). The editor auto-generates one from date + title. |
+| `Id` | **Stable unique id**, e.g. `"2026-07-28-summer-event"`. The game delivers each id once per player, ever — **never change an Id after publishing** (players would receive the entry again as a new message). The editor assigns it automatically (date + title, read-only) and keeps it fixed across edits; only hand-editing the JSON can break this. |
 | `Date` | ISO 8601. Used as the inbox message timestamp. |
 | `Title` | Message title in the inbox. |
 | `Body` | Message text (same markdown subset as patch notes). |

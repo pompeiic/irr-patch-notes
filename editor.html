@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IRR Patch Notes Editor</title>
+<title>Incursion Red River — News &amp; Patch Notes</title>
 <style>
   :root {
     --bg: #14161a; --panel: #1d2026; --panel2: #23262d; --border: #33373f;
@@ -71,7 +71,7 @@
 </head>
 <body>
 <header>
-  <h1>IRR LIVE DATA</h1>
+  <h1>INCURSION RED RIVER — NEWS &amp; PATCH NOTES</h1>
   <div class="tabs">
     <button id="tabPatches" class="active">Patch notes</button>
     <button id="tabNews" class="news-tab">News</button>
@@ -124,7 +124,7 @@
   <div class="col form-col" id="newsForm" style="display:none">
     <div class="row">
       <div><label>Date *</label><input type="date" id="newsDate"></div>
-      <div><label>Id — <small class="hint">auto from title; NEVER change after publishing</small></label><input type="text" id="newsId" placeholder="2026-07-summer-event"></div>
+      <div><label>Id — <small class="hint">auto-generated from date + title, fixed once created</small></label><input type="text" id="newsId" placeholder="(assigned on Apply)" readonly tabindex="-1" style="opacity:.6;cursor:default"></div>
     </div>
     <label>Title *</label><input type="text" id="newsTitle" placeholder="Community Event: Long Night">
     <label>Link URL (Steam, Discord, …)</label><input type="text" id="newsLink" placeholder="https://…">
@@ -287,12 +287,21 @@ function patchFromForm() {
 
 function newsFromForm() {
   return {
-    Id: $("newsId").value.trim(),
+    //Existing entries keep their published Id verbatim — the game's import-once tracking keys on it.
+    Id: selected >= 0 && news[selected] ? news[selected].Id : "",
     Date: ($("newsDate").value || new Date().toISOString().slice(0, 10)) + "T12:00:00",
     Title: $("newsTitle").value.trim(),
     Body: $("newsBody").value,
     LinkURL: $("newsLink").value.trim()
   };
+}
+
+//New entries get "YYYY-MM-DD-title-slug", suffixed -2/-3/… on collision. Never re-run for existing ids.
+function generateNewsId(n) {
+  const base = n.Date.slice(0, 10) + "-" + (slug(n.Title) || "untitled");
+  let id = base, i = 2;
+  while (news.some(x => x.Id === id)) id = base + "-" + i++;
+  return id;
 }
 
 function applyForm() {
@@ -309,12 +318,8 @@ function applyForm() {
     const n = newsFromForm();
     if (!n.Title) return status("Title is required", true);
     if (!n.Body.trim()) return status("Body is required", true);
-    if (!n.Id) { n.Id = n.Date.slice(0, 10) + "-" + slug(n.Title); $("newsId").value = n.Id; }
-    const dupe = news.findIndex((x, i) => i !== selected && x.Id === n.Id);
-    if (dupe >= 0) return status("A news entry with id " + n.Id + " already exists", true);
-    if (selected >= 0 && news[selected].Id && news[selected].Id !== n.Id
-        && !confirm("Id changed — players who already received \"" + news[selected].Id + "\" will get this entry AGAIN as a new message. Continue?"))
-      return false;
+    if (!n.Id) { n.Id = generateNewsId(n); }
+    $("newsId").value = n.Id;
     if (selected >= 0) news[selected] = n; else { news.push(n); selected = news.length - 1; }
     news.sort((a, b) => (b.Date || "").localeCompare(a.Date || ""));
     selected = news.findIndex(x => x.Id === n.Id);
