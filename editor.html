@@ -263,11 +263,11 @@
       <label><input type="checkbox" data-flag="bDeleteInventorySaveGame"> Inventory</label>
       <label><input type="checkbox" data-flag="bDeleteGameSettingsSaveGame"> Game settings</label>
     </div>
-    <label>Patch notes — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **strong** &nbsp;•&nbsp; &lt;italic&gt;…&lt;/&gt; tags per the in-game style table</small></label>
+    <label>Patch notes — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; &lt;strong&gt;…&lt;/&gt; tags per the in-game style table (** = strong shorthand)</small></label>
     <div class="toolbar" data-target="notes">
       <button data-md="## ">Section</button>
       <button data-md="- ">Bullet</button>
-      <button data-md="**">Strong</button>
+      <button data-tag="strong">Strong</button>
       <button data-tag="italic">Italic</button>
       <button data-tag="strongitalic">StrongItalic</button>
       <button data-tag="redacted">Redacted</button>
@@ -290,11 +290,11 @@
     </div>
     <label>Title *</label><input type="text" id="newsTitle" placeholder="Community Event: Long Night">
     <label>Link URL (Steam, Discord, …)</label><input type="text" id="newsLink" placeholder="https://…">
-    <label>Body * — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **strong** &nbsp;•&nbsp; &lt;italic&gt;…&lt;/&gt; tags — lands in the player inbox</small></label>
+    <label>Body * — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; &lt;strong&gt;…&lt;/&gt; tags per the in-game style table — lands in the player inbox</small></label>
     <div class="toolbar" data-target="newsBody">
       <button data-md="## ">Section</button>
       <button data-md="- ">Bullet</button>
-      <button data-md="**">Strong</button>
+      <button data-tag="strong">Strong</button>
       <button data-tag="italic">Italic</button>
       <button data-tag="strongitalic">StrongItalic</button>
       <button data-tag="redacted">Redacted</button>
@@ -608,7 +608,6 @@ document.querySelectorAll(".toolbar [data-md], .toolbar [data-tag]").forEach(btn
   const ta = $(btn.closest(".toolbar").dataset.target), s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
   const md = btn.dataset.md, tag = btn.dataset.tag;
   if (tag) ta.value = v.slice(0, s) + "<" + tag + ">" + v.slice(s, e) + "</>" + v.slice(e);
-  else if (md === "**") ta.value = v.slice(0, s) + "**" + v.slice(s, e) + "**" + v.slice(e);
   else ta.value = v.slice(0, s) + (s === 0 || v[s - 1] === "\n" ? "" : "\n") + md + v.slice(s);
   ta.focus(); renderPreview();
 });
