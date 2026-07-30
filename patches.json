@@ -10,7 +10,7 @@
       "bDeleteAllSaveGames": false,
       "bDeleteMissionSaveGame": false,
       "bDeleteWorldSaveGame": false,
-      "bDeleteSafehouseSaveGame": false,
+      "bDeleteSafehouseSaveGame": true,
       "bDeleteVendorSaveGame": false,
       "bDeleteStashSaveGame": false,
       "bDeleteInventorySaveGame": false,
