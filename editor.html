@@ -182,7 +182,7 @@
   .notes li { position: relative; padding-left: 14px; margin: 3px 0; }
   .notes li::before { content: "-"; position: absolute; left: 0; color: var(--dim); }
   .preview-footer { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 14px; margin-top: 4px; flex-wrap: wrap; }
-  .continue-btn, .steam-btn {
+  .continue-btn, .steam-btn, .delete-btn {
     display: inline-block; min-width: 160px; text-align: center;
     padding: 10px 28px; background: #0a0a0a; color: var(--text);
     border: 1px solid var(--border-strong);
@@ -192,6 +192,7 @@
     pointer-events: none; /* preview only */
   }
   .steam-btn { pointer-events: auto; color: var(--accent); border-color: var(--accent); }
+  .delete-btn { color: var(--danger); border-color: var(--danger); }
 
   /* News / inbox briefing mock */
   .news-preview {
@@ -388,8 +389,8 @@ function renderPreview() {
         `<div class="notes">${notesToHtml(p.PatchNotes || "")}</div>` +
       `</div>` +
       `<div class="preview-footer">` +
-        `<div class="continue-btn">Continue</div>` +
         (p.SteamAnnouncementURL ? `<a class="steam-btn" href="${esc(p.SteamAnnouncementURL)}" target="_blank" rel="noopener">Steam</a>` : "") +
+        `<div class="continue-btn">Continue</div>` +
       `</div>`;
   } else {
     const n = newsFromForm();
@@ -403,9 +404,10 @@ function renderPreview() {
         `<hr class="msg-rule">` +
         `<div class="notes">${notesToHtml(n.Body || "")}</div>` +
       `</div>` +
-      (n.LinkURL
-        ? `<div class="preview-footer"><a class="steam-btn" href="${esc(n.LinkURL)}" target="_blank" rel="noopener">Steam</a></div>`
-        : "");
+      `<div class="preview-footer">` +
+        (n.LinkURL ? `<a class="steam-btn" href="${esc(n.LinkURL)}" target="_blank" rel="noopener">Steam</a>` : "") +
+        `<div class="delete-btn">Delete</div>` +
+      `</div>`;
   }
 }
 
