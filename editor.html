@@ -181,6 +181,11 @@
   .notes ul { margin: 4px 0 12px; padding-left: 0; list-style: none; }
   .notes li { position: relative; padding-left: 14px; margin: 3px 0; }
   .notes li::before { content: "-"; position: absolute; left: 0; color: var(--dim); }
+  /* Inline styles mirroring the in-game rich-text style table rows */
+  .notes .rt-strong { font-weight: 700; }
+  .notes .rt-italic { font-style: italic; }
+  .notes .rt-strongitalic { font-weight: 700; font-style: italic; }
+  .notes .rt-redacted { background: var(--dim); color: transparent; border-radius: 1px; user-select: none; }
   .preview-footer { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 14px; margin-top: 4px; flex-wrap: wrap; }
   .continue-btn, .steam-btn, .delete-btn {
     display: inline-block; min-width: 160px; text-align: center;
@@ -258,11 +263,14 @@
       <label><input type="checkbox" data-flag="bDeleteInventorySaveGame"> Inventory</label>
       <label><input type="checkbox" data-flag="bDeleteGameSettingsSaveGame"> Game settings</label>
     </div>
-    <label>Patch notes — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **bold** (matches in-game rendering)</small></label>
+    <label>Patch notes — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **strong** &nbsp;•&nbsp; &lt;italic&gt;…&lt;/&gt; tags per the in-game style table</small></label>
     <div class="toolbar" data-target="notes">
       <button data-md="## ">Section</button>
       <button data-md="- ">Bullet</button>
-      <button data-md="**">Bold</button>
+      <button data-md="**">Strong</button>
+      <button data-tag="italic">Italic</button>
+      <button data-tag="strongitalic">StrongItalic</button>
+      <button data-tag="redacted">Redacted</button>
     </div>
     <textarea id="notes" class="body-md" placeholder="## Gameplay&#10;- Added the safehouse generator&#10;- **Reworked** vendor stock rotation"></textarea>
     <div class="actions">
@@ -282,11 +290,14 @@
     </div>
     <label>Title *</label><input type="text" id="newsTitle" placeholder="Community Event: Long Night">
     <label>Link URL (Steam, Discord, …)</label><input type="text" id="newsLink" placeholder="https://…">
-    <label>Body * — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **bold** — lands in the player inbox</small></label>
+    <label>Body * — <small class="hint">"## " section &nbsp;•&nbsp; "- " bullet &nbsp;•&nbsp; **strong** &nbsp;•&nbsp; &lt;italic&gt;…&lt;/&gt; tags — lands in the player inbox</small></label>
     <div class="toolbar" data-target="newsBody">
       <button data-md="## ">Section</button>
       <button data-md="- ">Bullet</button>
-      <button data-md="**">Bold</button>
+      <button data-md="**">Strong</button>
+      <button data-tag="italic">Italic</button>
+      <button data-tag="strongitalic">StrongItalic</button>
+      <button data-tag="redacted">Redacted</button>
     </div>
     <textarea id="newsBody" class="body-md" placeholder="Operators,&#10;&#10;this weekend the **Long Night** event runs on all maps.&#10;- Night raids only&#10;- Double vendor payouts"></textarea>
     <div class="actions">
@@ -340,7 +351,11 @@ function slug(s) {
 function notesToHtml(md) {
   const lines = md.replace(/\r\n/g, "\n").split("\n");
   let html = "", inList = false;
-  const inline = s => esc(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>");
+  //Inline styling = the game's rich-text style table rows (DT_IRR_Description_RichText); tag names are
+  //case-insensitive in-game, ** is shorthand for <strong>. Keep in sync with SIRRNotesText.
+  const inline = s => esc(s)
+    .replace(/&lt;(strong|italic|strongitalic|redacted)&gt;(.*?)&lt;\/(?:\1)?&gt;/gi, (m, t, c) => `<span class="rt-${t.toLowerCase()}">${c}</span>`)
+    .replace(/\*\*([^*]+)\*\*/g, '<span class="rt-strong">$1</span>');
   for (const line of lines) {
     if (line.startsWith("- ")) { if (!inList) { html += "<ul>"; inList = true; } html += "<li>" + inline(line.slice(2)) + "</li>"; continue; }
     if (inList) { html += "</ul>"; inList = false; }
@@ -589,9 +604,11 @@ $("copyBtn").onclick = $("newsCopyBtn").onclick = () => {
   if (selected < 0 || applyForm()) { navigator.clipboard.writeText(manifestJson()); status("Manifest JSON copied."); }
 };
 $("saveToken").onclick = () => { localStorage.setItem("irr_pat", $("token").value.trim()); status("Token stored in this browser."); };
-document.querySelectorAll(".toolbar [data-md]").forEach(btn => btn.onclick = () => {
-  const ta = $(btn.closest(".toolbar").dataset.target), md = btn.dataset.md, s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
-  if (md === "**") ta.value = v.slice(0, s) + "**" + v.slice(s, e) + "**" + v.slice(e);
+document.querySelectorAll(".toolbar [data-md], .toolbar [data-tag]").forEach(btn => btn.onclick = () => {
+  const ta = $(btn.closest(".toolbar").dataset.target), s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
+  const md = btn.dataset.md, tag = btn.dataset.tag;
+  if (tag) ta.value = v.slice(0, s) + "<" + tag + ">" + v.slice(s, e) + "</>" + v.slice(e);
+  else if (md === "**") ta.value = v.slice(0, s) + "**" + v.slice(s, e) + "**" + v.slice(e);
   else ta.value = v.slice(0, s) + (s === 0 || v[s - 1] === "\n" ? "" : "\n") + md + v.slice(s);
   ta.focus(); renderPreview();
 });
