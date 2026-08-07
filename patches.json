@@ -1,6 +1,22 @@
 {
   "Patches": [
     {
+      "Build": "#1.3.0.12",
+      "Date": "2026-08-07T12:00:00",
+      "Title": "FPS Games Show",
+      "PatchNotes": "## Gameplay\n- NEW GCPS UI\n- NEW Mission UI\n- NEW Inventory Rarity Colors & Stash Searching\n- NEW Patch System & News System (Check your inbox!)\n- Further Improved AI \n\n## Content\n- Outskirts Progress\n- Delta Interiors Finished\n- All New Food & Drink Items\n\n## Misc\n- Improved loading times\n- Improved CPU performance\n- Improved Audio (Check Delta in specific!)\n- Lots of bug fixes (Probably many more needed!)",
+      "SteamAnnouncementURL": "",
+      "bMajorUpdate": false,
+      "bDeleteAllSaveGames": false,
+      "bDeleteMissionSaveGame": true,
+      "bDeleteWorldSaveGame": false,
+      "bDeleteSafehouseSaveGame": false,
+      "bDeleteVendorSaveGame": false,
+      "bDeleteStashSaveGame": false,
+      "bDeleteInventorySaveGame": false,
+      "bDeleteGameSettingsSaveGame": false
+    },
+    {
       "Build": "#1.3.0.11",
       "Date": "2026-07-27T12:00:00",
       "Title": "Initial Tracked Build",
