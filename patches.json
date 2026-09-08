@@ -1,6 +1,22 @@
 {
   "Patches": [
     {
+      "Build": "#1.3.0.13",
+      "Date": "2026-09-08T12:00:00",
+      "Title": "Convoy & Airdrop",
+      "PatchNotes": "## Gameplay \n- NEW Convoy & Airdrop Operation (only on Delta atm)\n- NEW LRF (Laser Range Finder - needed for Convoy)\n\n## Content\n- More detailing on Outskirts\n\n## Fixes\n- Many bugfixes for reported issues via discord",
+      "SteamAnnouncementURL": "",
+      "bMajorUpdate": false,
+      "bDeleteAllSaveGames": false,
+      "bDeleteMissionSaveGame": false,
+      "bDeleteWorldSaveGame": false,
+      "bDeleteSafehouseSaveGame": false,
+      "bDeleteVendorSaveGame": false,
+      "bDeleteStashSaveGame": false,
+      "bDeleteInventorySaveGame": false,
+      "bDeleteGameSettingsSaveGame": false
+    },
+    {
       "Build": "#1.3.0.12",
       "Date": "2026-08-07T12:00:00",
       "Title": "FPS Games Show",
