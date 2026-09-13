@@ -1,6 +1,22 @@
 {
   "Patches": [
     {
+      "Build": "#1.3.0.14",
+      "Date": "2026-09-13T12:00:00",
+      "Title": "In Raid Trader & Secure Container",
+      "PatchNotes": "## Gameplay\n- NEW In Raid Trader (on delta, items to trader are temporary, bring cash!)\n- NEW In Raid Secure Container (next to trader, for a fee place items that are later delivered to message box)\n- NEW Item Swapping (any item in inventory can be now swapped, finally!)\n\n## Content\n- More progress on outskirts\n\n## Fixes\n- Most discord reports fixed\n- Much improved item dropping for clients (especially gear lands predictable in front of player, no more issues with floating gear)",
+      "SteamAnnouncementURL": "",
+      "bMajorUpdate": false,
+      "bDeleteAllSaveGames": false,
+      "bDeleteMissionSaveGame": false,
+      "bDeleteWorldSaveGame": false,
+      "bDeleteSafehouseSaveGame": false,
+      "bDeleteVendorSaveGame": false,
+      "bDeleteStashSaveGame": false,
+      "bDeleteInventorySaveGame": false,
+      "bDeleteGameSettingsSaveGame": false
+    },
+    {
       "Build": "#1.3.0.13",
       "Date": "2026-09-08T12:00:00",
       "Title": "Convoy & Airdrop",
