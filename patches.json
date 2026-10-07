@@ -1,6 +1,22 @@
 {
   "Patches": [
     {
+      "Build": "#1.3.0.17",
+      "Date": "2026-10-07T12:00:00",
+      "Title": "New Weapons & AI Settings",
+      "PatchNotes": "## Weapons\n- Added the Kel-Tec RFB, the MK-47, the M14, and the Norinco M305, with magazines and parts for each. \n\n## Gunsmith and inventory\n- Gunsmith attachment slots are laid out more consistently and are easier to follow.\n- Added a split-stack window.\n\n## Movement and combat\n- Refactored code for equipping weapons and gadgets, and both overhand and underhand grenade throws.\n- You can now climb onto rocks.\n- Fixed some third-person animation issues.\n- Fixed reinforcements on bunker.\n- Mission titles now show when a finished mission can be started again.\n\n## In-Raid Events\n- Airdrops call in reinforcement now.\n- Convoys are escorted with AI.\n- Added Trader and airdrops to other maps. \n\n## Terminals, trader, and bodies\n- Hacking needs a device in your inventory, and each command spends some of its battery. If the device runs out or you take it off, the hack pauses. \n- Updated trader interaction. \n\n## Outskirts\n- Finished the residential area beside the dock, including a loot pass, enemy spawns, and patrol routes.\n- Lighting pass on those streets and on the apartment exteriors.\n- Added sand and closed gaps along the sea wall, and guard rails where the road meets the water.\n- Finished the HAS site and its surroundings: exterior lighting, loot, enemy spawns, patrols, and the missing roof pieces and trim on Outpost C.\n- Added the Waiting Station, including an interior wall in the ticket booth.\n\n## Audio\n- Smoke grenades now make you and nearby bots cough.\n- Weapon handling sounds follow the weapon's weight.\n- Interiors on Outskirts, the Quarry, and the Tutorial were rebuilt, including outdoor ambience on Outskirts and new rain.\n- Added airstrike sounds.\n- Suppressed weapons have new sound tails.\n- Updated bullet impact sounds.\n- Fixed the sound on the chips and milk eating animations.\n- Added the sound for marking resources.\n\n## Graphics and interface\n- Added Intel XeSS upscaling and frame generation.\n- Fixed AMD FSR frame generation.\n- Changing keybinds, or switching frame generation, now warns you that the game has to restart.",
+      "SteamAnnouncementURL": "",
+      "bMajorUpdate": false,
+      "bDeleteAllSaveGames": false,
+      "bDeleteMissionSaveGame": false,
+      "bDeleteWorldSaveGame": false,
+      "bDeleteSafehouseSaveGame": false,
+      "bDeleteVendorSaveGame": false,
+      "bDeleteStashSaveGame": false,
+      "bDeleteInventorySaveGame": false,
+      "bDeleteGameSettingsSaveGame": false
+    },
+    {
       "Build": "#1.3.0.16",
       "Date": "2026-09-29T12:00:00",
       "Title": "Bug Fixes & Small QoL",
