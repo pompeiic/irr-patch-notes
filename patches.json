@@ -1,6 +1,22 @@
 {
   "Patches": [
     {
+      "Build": "#1.3.0.18",
+      "Date": "2026-10-09T12:00:00",
+      "Title": "Weapon Shadows & Convoy Hitch Fix",
+      "PatchNotes": "## Graphics and interface\n- Added first-person weapon shadows.\n- Fixed some foliage/trees not really reacting to wind.\n- Fixed hitches for convoy.\n\n## Movement and combat\n- Fixed weapon lights and night vision being taken off when you climb.\n\n## Inventory\n- Fixed vicinity containers.\n",
+      "SteamAnnouncementURL": "",
+      "bMajorUpdate": false,
+      "bDeleteAllSaveGames": false,
+      "bDeleteMissionSaveGame": false,
+      "bDeleteWorldSaveGame": false,
+      "bDeleteSafehouseSaveGame": false,
+      "bDeleteVendorSaveGame": false,
+      "bDeleteStashSaveGame": false,
+      "bDeleteInventorySaveGame": false,
+      "bDeleteGameSettingsSaveGame": false
+    },
+    {
       "Build": "#1.3.0.17",
       "Date": "2026-10-07T12:00:00",
       "Title": "New Weapons & AI Settings",
